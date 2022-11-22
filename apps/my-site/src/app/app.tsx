@@ -1,10 +1,18 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import styles from './app.module.css';
 import NxWelcome from './nx-welcome';
-
+import React, { useState, useEffect } from 'react';
 import { Route, Routes, Link } from 'react-router-dom';
 import { PageTitle } from "@nx-workspace/ui-header"
+import { ApiResponse, API_URL} from '@nx-workspace/api-interface'
+
 export function App() {
+  const [apiResponse, setApiResponse] =useState<ApiResponse>({ message: 'Loading...'});
+  useEffect(() => {
+    fetch(API_URL).then(r => r.json()).then(setApiResponse);
+  },[])
+
+  console.log(apiResponse.message);
   return (
     <>
       <NxWelcome title="my-site" />
