@@ -1,62 +1,103 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import styles from './app.module.css';
-import NxWelcome from './nx-welcome';
-import React, { useState, useEffect } from 'react';
-import { Route, Routes, Link } from 'react-router-dom';
-import { PageTitle } from "@nx-workspace/ui-header"
-import { ApiResponse, API_URL} from '@nx-workspace/api-interface'
+import React, { useEffect, useState } from 'react';
+import { Game } from '@nx-workspace/api-interface';
+import styled from '@emotion/styled';
 
-export function App() {
-  const [apiResponse, setApiResponse] =useState<ApiResponse>({ message: 'Loading...'});
+export const TileGrid = styled.div`
+  display: flex;
+  flex-flow: wrap;
+  justify-content: space-evenly;
+`;
+
+export const Tile = styled.div`
+  border: solid 1px #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  display: block;
+  min-width: 200px;
+  color: inherit;
+  text-decoration: none;
+  margin: 0.5em;
+  &:hover {
+    border-color: #5159ea;
+  }
+`;
+
+export const ImageWrapper = styled.div`
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: solid 1px #ccc;
+`;
+
+export const Image = styled.img`
+  max-width: 100%;
+  min-height: 100%;
+`;
+
+export const TileTitle = styled.h2`
+  text-align: center;
+`;
+
+export const TileLeftCorner = styled.div`
+  display: block;
+  float: left;
+  margin: -0.5em 0 1em 0.5em;
+`;
+
+export const TileRightCorner = styled.div`
+  display: block;
+  float: right;
+  margin: -0.5em 0.5em 1em 0;
+`;
+export const currencyFormat = (amount: number) => '$' + amount.toFixed(2);
+export const ratingFormat = (rating: number | undefined) =>
+  (rating === undefined ? '?' : rating.toFixed(0)) + '/5';
+
+export const App = () => {
+  const [games, setGames] = useState<Game[]>([]);
+
   useEffect(() => {
-    fetch(API_URL).then(r => r.json()).then(setApiResponse);
-  },[])
+    fetch('/api/game')
+      .then(r => r.json())
+      .then(setGames);
+  }, []);
 
-  console.log(apiResponse.message);
   return (
     <>
-      <NxWelcome title="my-site" />
-      <div />
-
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-        <PageTitle></PageTitle>
+      <div style={{ textAlign: 'center' }}>
+        <h1>Board Game Hoard: Review</h1>
       </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
-      {/* END: routes */}
+      <TileGrid>
+    {games.map(game => {
+      return (
+        <a
+          href={'/' + game.id}
+          key={game.id}
+          style={{ textDecoration: 'none', color: 'inherit' }}
+        >
+          <Tile>
+            {game.image && (
+              <ImageWrapper>
+                <Image src={game.image} />
+              </ImageWrapper>
+            )}
+            <TileTitle>{game.name}</TileTitle>
+            <TileLeftCorner>
+              {ratingFormat(game.rating)}
+            </TileLeftCorner>
+            <TileRightCorner>
+              {currencyFormat(game.price)}
+            </TileRightCorner>
+          </Tile>
+        </a>
+      );
+    })}
+  </TileGrid>
     </>
   );
-}
+};
 
 export default App;
